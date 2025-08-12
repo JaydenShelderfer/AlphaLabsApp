@@ -1,0 +1,81 @@
+version: '3.8'
+
+networks:
+  private_network:
+    driver: bridge
+
+services:
+  # PostgreSQL Database
+  db:
+    networks:
+      - private_network
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: alphalabs_mobile
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Redis for caching
+  redis:
+    image: redis:latest
+    networks:
+      - private_network
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # FastAPI Backend
+  api:
+    networks:
+      - private_network
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=dev
+      - DATABASE_URL=postgresql://dev:dev@db:5432/alphalabs_mobile
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    networks:
+      - private_network
+    image: dpage/pgadmin4:latest
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@alphalabs.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - db
+    volumes:
+      - ./data/pgadmin:/var/lib/pgadmin 
