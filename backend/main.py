@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 import uvicorn
 import os
+import logging
 
 from app.core.config import settings
 from app.api import auth, chat, documents, users
 from app.core.database import engine, Base
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("alphalabs.api")
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -14,27 +19,38 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="AlphaLabs Mobile API",
     description="Backend API for AlphaLabs Mobile Application",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-# CORS middleware for mobile app access
+# CORS (tighten in prod)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict to your mobile app
+    allow_origins=["*"],          # TODO: restrict in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount static files for uploads
+# Static uploads
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# Include routers
+# Routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
+
+@app.on_event("startup")
+async def on_startup():
+    logger.info("Starting AlphaLabs Mobile API")
+    # Optional quick DB ping at startup (non-fatal)
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("DB connectivity OK")
+    except Exception as e:
+        logger.warning(f"DB connectivity check failed: {e}")
 
 @app.get("/")
 async def root():
@@ -42,12 +58,28 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "AlphaLabs Mobile API"}
+    db_ok = True
+    db_err = None
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except Exception as e:
+        db_ok = False
+        db_err = str(e)
+    return {
+        "status": "healthy" if db_ok else "degraded",
+        "service": "AlphaLabs Mobile API",
+        "db": {"ok": db_ok, "error": db_err},
+    }
 
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True
-    ) 
+        port=8000,               # match this in your RN BASE_URL
+        reload=True,             # disable in prod
+        access_log=True,
+        log_level="debug",
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )

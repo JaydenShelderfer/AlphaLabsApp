@@ -26,9 +26,9 @@ def init_db():
             )
             db.add(default_client)
             db.commit()
-            print("✅ Default client created")
+            print("Default client created")
         else:
-            print("✅ Default client already exists")
+            print("Default client already exists")
         
         # Check if test user exists
         test_user = db.query(User).filter(User.email == "test@alphalabs.com").first()
@@ -42,17 +42,17 @@ def init_db():
             )
             db.add(test_user)
             db.commit()
-            print("✅ Test user created (email: test@alphalabs.com, password: password123)")
+            print("Test user created (email: test@alphalabs.com, password: password123)")
         else:
-            print("✅ Test user already exists")
+            print("Test user already exists")
             
     except Exception as e:
-        print(f"❌ Error initializing database: {e}")
+        print(f"Error initializing database: {e}")
         db.rollback()
     finally:
         db.close()
 
 if __name__ == "__main__":
-    print("🚀 Initializing AlphaLabs Mobile Database...")
+    print("Initializing AlphaLabs Mobile Database...")
     init_db()
-    print("✅ Database initialization complete!") 
+    print("Database initialization complete!") 

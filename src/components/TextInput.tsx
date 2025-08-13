@@ -36,10 +36,14 @@ export const TextInput: React.FC = () => {
 
       addMessage(assistantMessage);
       setError(null);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
-    } finally {
+    } catch (error: any) {
+      if (error instanceof TypeError && error.message === 'Network request failed') {
+        console.error('Network request failed → likely URL/port/connection issue.');
+      }
+      console.error('Error sending message (full):', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      setError(`Failed to send message: ${error.message || error}`);
+    }
+    finally {
       setLoading(false);
     }
   };
