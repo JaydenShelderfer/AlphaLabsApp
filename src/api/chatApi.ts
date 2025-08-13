@@ -1,7 +1,7 @@
 import { ChatMessage, ChatResponse, ApiError } from '../types';
 
 // AlphaLabs Mobile Backend API
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://10.0.2.2:8000';
 
 class ChatApi {
   private async request<T>(
