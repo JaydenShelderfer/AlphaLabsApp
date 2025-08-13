@@ -4,7 +4,7 @@ import os
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://dev:dev@localhost:5433/alphalabs_mobile"
+    DATABASE_URL: str = "postgresql://dev:dev@localhost:5432/alphalabs_mobile"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6380/0"

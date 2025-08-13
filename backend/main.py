@@ -25,7 +25,7 @@ app = FastAPI(
 # CORS (tighten in prod)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # TODO: restrict in prod
+    allow_origins=["*"],          
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,10 +36,10 @@ os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Routers
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
-app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
-app.include_router(users.router, prefix="/api/users", tags=["Users"])
+app.include_router(auth, prefix="/api/auth", tags=["Authentication"])
+app.include_router(chat, prefix="/api/chat", tags=["Chat"])
+app.include_router(documents, prefix="/api/documents", tags=["Documents"])
+app.include_router(users, prefix="/api/users", tags=["Users"])
 
 @app.on_event("startup")
 async def on_startup():
@@ -76,8 +76,8 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,               # match this in your RN BASE_URL
-        reload=True,             # disable in prod
+        port=8000,            
+        reload=True,            
         access_log=True,
         log_level="debug",
         proxy_headers=True,
