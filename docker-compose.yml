@@ -9,7 +9,7 @@ services:
       - private_network
     image: postgres:15
     ports:
-      - "5433:5432"
+      - "5432:5432"  # host:container (always match for simplicity)
     environment:
       POSTGRES_USER: dev
       POSTGRES_PASSWORD: dev
@@ -17,7 +17,7 @@ services:
     volumes:
       - ./data/pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -U dev -d alphalabs_mobile"]
       interval: 2s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
     networks:
       - private_network
     ports:
-      - "6380:6379"
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -53,6 +53,11 @@ services:
       - SECRET_KEY=your-secret-key-here-change-in-production
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - DISABLE_AUTH=True
+      - CREATE_TEST_USER=True
+      - TEST_USER_EMAIL=dev@local
+      - TEST_USER_PASSWORD=devpass
+      - TEST_USER_NAME=Dev User
     depends_on:
       db:
         condition: service_healthy
@@ -76,4 +81,4 @@ services:
     depends_on:
       - db
     volumes:
-      - ./data/pgadmin:/var/lib/pgadmin 
+      - ./data/pgadmin:/var/lib/pgadmin

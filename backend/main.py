@@ -22,6 +22,13 @@ app = FastAPI(
     version="1.0.0",
 )
 
+#---- TEMP auth bypass: override the dependency with a fake user ----
+#def _fake_user():
+ #   return SimpleNamespace(id=1, email="dev@local", name="Dev User", is_active=True)
+
+#app.dependency_overrides[auth.get_current_user] = _fake_user
+# --------------------------------------------------------------------
+
 # CORS (tighten in prod)
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +58,23 @@ async def on_startup():
         logger.info("DB connectivity OK")
     except Exception as e:
         logger.warning(f"DB connectivity check failed: {e}")
+
+    # ---- Optional: ensure a real test user exists ----
+    if settings.CREATE_TEST_USER:
+        try:
+            with Session(bind=engine) as db:
+                user = db.query(User).filter(User.email == settings.TEST_USER_EMAIL).first()
+                if not user:
+                    hashed = auth_module.get_password_hash(settings.TEST_USER_PASSWORD)
+                    user = User(email=settings.TEST_USER_EMAIL, name=settings.TEST_USER_NAME, password=hashed)
+                    db.add(user)
+                    db.commit()
+                    logger.info(f"Created test user: {settings.TEST_USER_EMAIL}")
+                else:
+                    logger.info(f"Test user already present: {settings.TEST_USER_EMAIL}")
+        except Exception as e:
+            logger.warning(f"Could not ensure test user: {e}")
+    # -----------------------------------------------
 
 @app.get("/")
 async def root():

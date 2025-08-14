@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "dev"
     DEBUG: bool = True
     
+    # Auth
+    DISABLE_AUTH: bool = False
+    CREATE_TEST_USER: bool = False
+    TEST_USER_EMAIL: str = "dev@local"
+    TEST_USER_PASSWORD: str = "devpass"
+    TEST_USER_NAME: str = "Dev User"
+
     # API
     API_V1_STR: str = "/api"
     PROJECT_NAME: str = "AlphaLabs Mobile API"
