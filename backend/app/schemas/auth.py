@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, Dict, Any
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -22,6 +22,16 @@ class UserResponse(BaseModel):
     email: str
     name: str
     is_active: bool
+    client_id: Optional[int] = None
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+class SigninRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class SigninResponse(BaseModel):
+    token: Optional[str] = None
+    user: Optional[UserResponse] = None
+    issuer: Optional[Dict[str, Any]] = None 

@@ -51,6 +51,14 @@ app.include_router(users, prefix="/api/users", tags=["Users"])
 @app.on_event("startup")
 async def on_startup():
     logger.info("Starting AlphaLabs Mobile API")
+    
+    # Create database tables
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.warning(f"Could not create database tables: {e}")
+    
     # Optional quick DB ping at startup (non-fatal)
     try:
         with engine.connect() as conn:
@@ -62,16 +70,26 @@ async def on_startup():
     # ---- Optional: ensure a real test user exists ----
     if settings.CREATE_TEST_USER:
         try:
-            with Session(bind=engine) as db:
+            from app.core.database import SessionLocal
+            from app.models.user import User
+            from app.api.auth import get_password_hash
+            
+            db = SessionLocal()
+            try:
                 user = db.query(User).filter(User.email == settings.TEST_USER_EMAIL).first()
                 if not user:
-                    hashed = auth_module.get_password_hash(settings.TEST_USER_PASSWORD)
+                    hashed = get_password_hash(settings.TEST_USER_PASSWORD)
                     user = User(email=settings.TEST_USER_EMAIL, name=settings.TEST_USER_NAME, password=hashed)
                     db.add(user)
                     db.commit()
                     logger.info(f"Created test user: {settings.TEST_USER_EMAIL}")
                 else:
                     logger.info(f"Test user already present: {settings.TEST_USER_EMAIL}")
+            except Exception as e:
+                db.rollback()
+                logger.warning(f"Error creating test user: {e}")
+            finally:
+                db.close()
         except Exception as e:
             logger.warning(f"Could not ensure test user: {e}")
     # -----------------------------------------------

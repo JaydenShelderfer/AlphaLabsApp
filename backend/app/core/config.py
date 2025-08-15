@@ -4,10 +4,10 @@ import os
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://dev:dev@localhost:5432/alphalabs_mobile"
+    DATABASE_URL: str = "postgresql://dev:dev@db:5432/alphalabs_mobile"
     
     # Redis
-    REDIS_URL: str = "redis://localhost:6380/0"
+    REDIS_URL: str = "redis://redis:6379/0"
     
     # Security
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     
     # Auth
     DISABLE_AUTH: bool = False
-    CREATE_TEST_USER: bool = False
-    TEST_USER_EMAIL: str = "dev@local"
+    CREATE_TEST_USER: bool = True
+    TEST_USER_EMAIL: str = "dev@alphalabs.com"
     TEST_USER_PASSWORD: str = "devpass"
     TEST_USER_NAME: str = "Dev User"
 

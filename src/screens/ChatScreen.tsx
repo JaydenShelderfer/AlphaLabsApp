@@ -8,7 +8,12 @@ import { VoiceInput } from '../components/VoiceInput';
 import { TextInput } from '../components/TextInput';
 import { voiceUtils } from '../utils/voiceUtils';
 
-export const ChatScreen: React.FC = () => {
+interface ChatScreenProps {
+  onLogout: () => void;
+  user: any;
+}
+
+export const ChatScreen: React.FC<ChatScreenProps> = ({ onLogout, user }) => {
   const { 
     messages, 
     isLoading, 
@@ -82,9 +87,10 @@ export const ChatScreen: React.FC = () => {
         <Appbar.Content 
           title="Alphi" 
           titleStyle={styles.headerTitle}
-          subtitle="AlphaLabs AI Assistant"
+          subtitle={`Welcome, ${user?.name || 'User'}`}
         />
         <Appbar.Action icon="delete" onPress={handleClearChat} />
+        <Appbar.Action icon="logout" onPress={onLogout} />
       </Appbar.Header>
 
       <FlatList

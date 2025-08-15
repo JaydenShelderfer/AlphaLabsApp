@@ -33,6 +33,18 @@ class ChatApi {
     }
   }
 
+  async login(email: string, password: string): Promise<any> {
+    const payload = {
+      email,
+      password,
+    };
+
+    return this.request<any>('/api/auth/signin', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
   async sendMessage(message: string, conversationId?: string): Promise<ChatResponse> {
     const payload = {
       message,

@@ -55,7 +55,7 @@ services:
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
       - DISABLE_AUTH=True
       - CREATE_TEST_USER=True
-      - TEST_USER_EMAIL=dev@local
+      - TEST_USER_EMAIL=dev@alphalabs.com
       - TEST_USER_PASSWORD=devpass
       - TEST_USER_NAME=Dev User
     depends_on:
