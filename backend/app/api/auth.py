@@ -72,7 +72,7 @@ def generate_jwt_token(user: User, client_id: int = 1) -> str:
         
         # User claims
         'user': {
-            'id': str(user.id),
+            'id': user.id,
             'name': user.name,
             'email': user.email,
             'client_id': client_id,
@@ -98,6 +98,20 @@ def authenticate_user(db: Session, email: str, password: str):
     return user
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    # Dev bypass when enabled
+    if settings.DISABLE_AUTH:
+        # Return the first user or create the test user if none exists
+        user = db.query(User).first()
+        if user:
+            return user
+        # Create test user if not present
+        hashed = get_password_hash(settings.TEST_USER_PASSWORD)
+        user = User(email=settings.TEST_USER_EMAIL, name=settings.TEST_USER_NAME, password=hashed)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -110,8 +124,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         # Decode the JWT token
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[JWT_ALGORITHM])
         
-        user_id = payload.get("user", {}).get("id")
-        if user_id is None:
+        user_id_claim = payload.get("user", {}).get("id")
+        if user_id_claim is None:
+            raise credentials_exception
+        # Coerce to integer to match database column type
+        try:
+            user_id = int(user_id_claim)
+        except (TypeError, ValueError):
             raise credentials_exception
             
         # Get user from database

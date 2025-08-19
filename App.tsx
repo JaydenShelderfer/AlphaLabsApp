@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Text } from 'react-native';
 import { ChatScreen } from './src/screens/ChatScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
+import { chatApi } from './src/api/chatApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Custom theme for AlphaLabs branding
@@ -49,6 +50,7 @@ export default function App() {
     try {
       await AsyncStorage.setItem('authToken', token);
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      chatApi.resetActiveChat();
       setUser(userData);
       setIsAuthenticated(true);
     } catch (error) {
@@ -60,6 +62,7 @@ export default function App() {
     try {
       await AsyncStorage.removeItem('authToken');
       await AsyncStorage.removeItem('userData');
+      chatApi.resetActiveChat();
       setUser(null);
       setIsAuthenticated(false);
     } catch (error) {
