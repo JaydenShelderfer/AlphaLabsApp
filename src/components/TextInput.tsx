@@ -27,7 +27,7 @@ export const TextInput: React.FC = () => {
       const response = await chatApi.sendMessage(userMessage.content);
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
-        content: response.response,
+        content: response.answer,
         role: 'assistant' as const,
         timestamp: new Date(),
         isVoice: false,

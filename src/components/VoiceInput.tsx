@@ -79,7 +79,7 @@ export const VoiceInput: React.FC = () => {
         const response = await chatApi.sendMessage(transcribedText);
         const assistantMessage = {
           id: (Date.now() + 1).toString(),
-          content: response.response,
+          content: response.answer,
           role: 'assistant' as const,
           timestamp: new Date(),
           isVoice: false,

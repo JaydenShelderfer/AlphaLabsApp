@@ -1,8 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import { ApiError } from '../types';
 
-// AlphaLabs Mobile Backend API
-const API_BASE_URL = 'http://10.0.2.2:8000';
+// External Alpha Labs Platform Internal API (defaults; override via app.json extra or EXPO_PUBLIC_API_BASE_URL)
+const ENV_URL = (process.env as any)?.EXPO_PUBLIC_API_BASE_URL ?? (Constants?.expoConfig?.extra as any)?.apiBaseUrl;
+const DEFAULT_URL = Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
+const API_BASE_URL = ENV_URL || DEFAULT_URL;
+
+export const getApiBaseUrl = (): string => API_BASE_URL;
 
 class ChatApi {
   private activeChatId: number | null = null;
@@ -44,12 +50,18 @@ class ChatApi {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        let message = `HTTP error! status: ${response.status}`;
+        const status = response.status;
+        let message = `HTTP error! status: ${status}`;
         try {
           const errorData = await response.json();
           message = errorData?.message || errorData?.detail || message;
         } catch {}
-        throw new Error(message);
+        if (status === 401 || status === 403) {
+          try { await AsyncStorage.removeItem('authToken'); } catch {}
+        }
+        const err = new Error(message) as Error & { status?: number };
+        err.status = status;
+        throw err;
       }
 
       return await response.json();
@@ -71,36 +83,27 @@ class ChatApi {
     });
   }
 
-  private async ensureChat(): Promise<number> {
+  async sendMessage(message: string): Promise<{ answer: string; chat_id?: number; message_id?: number }> {
+    const payload: Record<string, any> = { question: message };
     if (this.activeChatId) {
-      return this.activeChatId;
+      payload.chat_id = this.activeChatId;
     }
-    const chat = await this.request<{ id: number; title: string; user_id: number; client_id: number; created_on: string }>(
-      '/api/chat/',
-      {
-        method: 'POST',
-        body: JSON.stringify({}),
-      }
-    );
-    this.activeChatId = chat.id;
-    return chat.id;
-  }
-
-  async sendMessage(message: string): Promise<{ id: number; content: string; response: string; is_voice: boolean; created_on: string }> {
-    const chatId = await this.ensureChat();
-    const payload = { content: message, is_voice: false };
-    return this.request<{ id: number; content: string; response: string; is_voice: boolean; created_on: string }>(
-      `/api/chat/${chatId}/messages`,
+    const result = await this.request<{ answer: string; chat_id?: number; message_id?: number }>(
+      '/api/chats/query',
       {
         method: 'POST',
         body: JSON.stringify(payload),
       }
     );
+    if (result.chat_id) {
+      this.activeChatId = result.chat_id;
+    }
+    return result;
   }
 
   async getChatHistory(chatId: number): Promise<Array<{ id: number; content: string; response: string; is_voice: boolean; created_on: string }>> {
     return this.request<Array<{ id: number; content: string; response: string; is_voice: boolean; created_on: string }>>(
-      `/api/chat/${chatId}/messages`
+      `/api/chats/messages/${chatId}`
     );
   }
 
