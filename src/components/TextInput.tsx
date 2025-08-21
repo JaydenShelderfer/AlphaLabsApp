@@ -1,50 +1,25 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput as PaperTextInput, IconButton } from 'react-native-paper';
-import { useChatStore } from '../stores/chatStore';
-import { chatApi } from '../api/chatApi';
+import { TextInput as PaperTextInput } from 'react-native-paper';
 
-export const TextInput: React.FC = () => {
+interface TextInputProps {
+  onSendMessage: (message: string) => void;
+  isLoading?: boolean;
+  disabled?: boolean;
+}
+
+export const TextInput: React.FC<TextInputProps> = ({
+  onSendMessage,
+  isLoading = false,
+  disabled = false,
+}) => {
   const [message, setMessage] = useState('');
-  const { addMessage, setLoading, setError } = useChatStore();
 
-  const sendMessage = async () => {
-    if (!message.trim()) return;
-
-    const userMessage = {
-      id: Date.now().toString(),
-      content: message.trim(),
-      role: 'user' as const,
-      timestamp: new Date(),
-      isVoice: false,
-    };
-
-    addMessage(userMessage);
+  const sendMessage = () => {
+    if (!message.trim() || isLoading || disabled) return;
+    
+    onSendMessage(message.trim());
     setMessage('');
-    setLoading(true);
-
-    try {
-      const response = await chatApi.sendMessage(userMessage.content);
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        content: response.answer,
-        role: 'assistant' as const,
-        timestamp: new Date(),
-        isVoice: false,
-      };
-
-      addMessage(assistantMessage);
-      setError(null);
-    } catch (error: any) {
-      if (error instanceof TypeError && error.message === 'Network request failed') {
-        console.error('Network request failed → likely URL/port/connection issue.');
-      }
-      console.error('Error sending message (full):', JSON.stringify(error, Object.getOwnPropertyNames(error)));
-      setError(`Failed to send message: ${error.message || error}`);
-    }
-    finally {
-      setLoading(false);
-    }
   };
 
   const handleSubmit = () => {
@@ -64,12 +39,13 @@ export const TextInput: React.FC = () => {
         multiline
         maxLength={1000}
         onSubmitEditing={handleSubmit}
+        disabled={disabled}
         right={
           <PaperTextInput.Icon
             icon="send"
             onPress={sendMessage}
-            disabled={!message.trim()}
-            color={message.trim() ? "#F16736" : "#C0C0C0"}
+            disabled={!message.trim() || isLoading || disabled}
+            color={message.trim() && !isLoading && !disabled ? "#F16736" : "#C0C0C0"}
           />
         }
       />

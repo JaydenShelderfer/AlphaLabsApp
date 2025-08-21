@@ -26,6 +26,22 @@ export interface Document {
   uploaded_at: Date;
 }
 
+// New document types for selection functionality
+export interface DocumentListItem {
+  id: string;
+  title: string;
+  original_filename?: string;
+  document_status: string;
+  created_on: string;
+  updated_on: string;
+}
+
+export interface SelectedDocumentPillProps {
+  fileName: string;
+  onRemove: () => void;
+  isDeleted?: boolean;
+}
+
 export interface ApiError {
   message: string;
   status: number;

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { ApiError } from '../types';
+import { DocumentListItem } from '../types';
 
 // External Alpha Labs Platform Internal API (defaults; override via app.json extra or EXPO_PUBLIC_API_BASE_URL)
 const ENV_URL = (process.env as any)?.EXPO_PUBLIC_API_BASE_URL ?? (Constants?.expoConfig?.extra as any)?.apiBaseUrl;
@@ -12,10 +12,6 @@ export const getApiBaseUrl = (): string => API_BASE_URL;
 
 class ChatApi {
   private activeChatId: number | null = null;
-
-  public resetActiveChat() {
-    this.activeChatId = null;
-  }
 
   private async request<T>(
     endpoint: string,
@@ -83,8 +79,11 @@ class ChatApi {
     });
   }
 
-  async sendMessage(message: string): Promise<{ answer: string; chat_id?: number; message_id?: number }> {
-    const payload: Record<string, any> = { question: message };
+  async sendMessage(message: string, selectedDocumentIds: string[] = []): Promise<{ answer: string; chat_id?: number; message_id?: number }> {
+    const payload: Record<string, any> = { 
+      question: message,
+      document_ids: selectedDocumentIds
+    };
     if (this.activeChatId) {
       payload.chat_id = this.activeChatId;
     }
@@ -107,6 +106,10 @@ class ChatApi {
     );
   }
 
+  async fetchDocuments(): Promise<DocumentListItem[]> {
+    return this.request<DocumentListItem[]>('/api/documents');
+  }
+
   async uploadDocument(file: File): Promise<{ id: string; name: string }> {
     const formData = new FormData();
     formData.append('file', file);
@@ -116,6 +119,10 @@ class ChatApi {
       // Don't set Content-Type; fetch will set the correct multipart boundary
       body: formData,
     });
+  }
+
+  public resetActiveChat() {
+    this.activeChatId = null;
   }
 }
 

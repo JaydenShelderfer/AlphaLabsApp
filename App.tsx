@@ -38,9 +38,14 @@ export default function App() {
       if (token && userData) {
         setUser(JSON.parse(userData));
         setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +91,7 @@ export default function App() {
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
         {isAuthenticated ? (
-          <ChatScreen onLogout={handleLogout} user={user} />
+          <ChatScreen onLogout={handleLogout} />
         ) : (
           <LoginScreen onLoginSuccess={handleLoginSuccess} />
         )}
