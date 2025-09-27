@@ -1,6 +1,6 @@
 # AlphaLabs Mobile App
 
-A complete mobile application for AlphaLabs Intelligence company, featuring Alphi - the AI agent for document analysis, voice input, and financial insights.
+This repository is **frontend** only. All server/API logic is in main Alphalabs repo.
 
 ## 🚀 Features
 
