@@ -47,26 +47,7 @@ git clone <your-repo-url>
 cd AlphaLabsMobile
 npm install
 ```
-
-#### **2. Start the Backend Services**
-```bash
-# Start PostgreSQL, Redis, and FastAPI backend
-docker-compose up -d
-
-# Check service status
-docker-compose ps
-```
-
-#### **3. Initialize Database**
-```bash
-# Navigate to backend directory
-cd backend
-
-# Run database initialization
-python init_db.py
-```
-
-#### **4. Start Mobile App**
+#### **2. Start Mobile App**
 ```bash
 # In the root directory
 npm start
@@ -82,12 +63,6 @@ npm run web
 ```
 
 ## 🔧 Configuration
-
-### **Backend Services**
-- **FastAPI**: http://localhost:8000
-- **PostgreSQL**: localhost:5433
-- **Redis**: localhost:6380
-- **pgAdmin**: http://localhost:5050 (admin@alphalabs.com / admin)
 
 ### **Mobile App API**
 - **Base URL**: http://localhost:8000
@@ -123,21 +98,8 @@ AlphaLabsMobile/
 └── uploads/                # Document storage
 ```
 
-## 🎨 Design System
 
-### **Colors**
-- **Primary**: #0D2D3E (Dark Blue)
-- **Accent**: #F16736 (Orange)
-- **Background**: #F5F5F5 (Light Gray)
-- **Surface**: #FFFFFF (White)
-- **Text**: #333333 (Dark Gray)
-
-### **Typography**
-- **Headers**: Bold, 20-24px
-- **Body**: Regular, 16px
-- **Captions**: Regular, 12-14px
-
-## 🔌 API Integration
+## API Integration
 
 ### **Authentication Endpoints**
 - `POST /api/auth/register` - User registration
@@ -155,133 +117,18 @@ AlphaLabsMobile/
 - `GET /api/documents/` - Get user documents
 - `GET /api/documents/{document_id}` - Get specific document
 
-## 🎤 Voice Features
+## Voice Features
 
 - **Recording**: High-quality audio recording
 - **Permissions**: Automatic microphone permission handling
-- **Processing**: Voice-to-text conversion (TODO: implement)
+- **Processing**: Voice-to-text conversion (TODO: implement use wisper)
 - **Playback**: Text-to-speech for AI responses
 
-## 📄 Document Support
-
-Supported document types:
-- PDF files
-- Text documents
-- Word documents (.doc, .docx)
-- Images (JPEG, PNG)
-
-## 🚧 Development Status
-
-### ✅ Completed
-- **Mobile App**: Complete chat interface with voice input
-- **Backend API**: Full FastAPI server with authentication
-- **Database**: PostgreSQL with proper models and relationships
-- **Docker Setup**: Complete containerized development environment
-- **API Integration**: Real backend connection for mobile app
-
-### 🚧 In Progress
-- Voice-to-text integration
-- Document analysis with AI
-- Advanced chat features
-
-### 📋 TODO
-- Push notifications
-- Offline support
-- Advanced document processing
-- User management dashboard
-
-## 🧪 Testing
-
-### **Backend Testing**
-```bash
-cd backend
-pytest
-```
-
-### **Mobile App Testing**
-```bash
-npm test
-```
-
-## 📦 Building
-
-### **Development Build**
-```bash
-expo build:android --type apk
-expo build:ios --type archive
-```
-
-### **Production Build**
-```bash
-expo build:android --type app-bundle
-expo build:ios --type archive
-```
-
-## 🚀 Deployment
-
-### **Backend Deployment**
-1. **Update environment variables**
-2. **Set proper SECRET_KEY**
-3. **Configure CORS origins**
-4. **Set up SSL/TLS**
-5. **Configure database backups**
-
 ### **Mobile App Deployment**
-1. **Expo Application Services (EAS)**:
+**Expo Application Services (EAS)**:
    ```bash
    npm install -g @expo/eas-cli
    eas build --platform all
    eas submit --platform all
    ```
 
-2. **Manual Build**:
-   - Build APK/IPA files
-   - Upload to app stores
-   - Configure backend deployment
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is proprietary to AlphaLabs Intelligence.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
-
-## 🔄 Updates
-
-Stay updated with the latest changes:
-```bash
-git pull origin main
-npm install
-docker-compose pull
-docker-compose up -d
-```
-
----
-
-## 🎯 **What You Have Now**
-
-✅ **Complete Mobile App** with beautiful AlphaLabs branding
-✅ **Production-Ready Backend** with FastAPI and PostgreSQL
-✅ **Real Database** with proper models and relationships
-✅ **Authentication System** with JWT tokens
-✅ **Document Upload** and management
-✅ **Chat System** with persistent storage
-✅ **Docker Environment** for easy development
-
-**Your AlphaLabs mobile app is now a fully functional, production-ready application with a real backend!**
-
----
-
-**Built with ❤️ by AlphaLabs Development Team** 
